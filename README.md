@@ -1,3 +1,7 @@
+## Difference with root canvg
+
+In this fork, the canvg function outputs the canvas operations as a string, allowing to save the drawing operations as a function, for example.
+
 [![Build Status](https://travis-ci.com/canvg/canvg.svg?branch=master)](https://travis-ci.com/canvg/canvg)
 [![npm](https://img.shields.io/npm/dm/canvg.svg)](https://www.npmjs.com/package/canvg)
 [![](https://data.jsdelivr.com/v1/package/npm/canvg/badge?style=rounded)](https://www.jsdelivr.com/package/npm/canvg)

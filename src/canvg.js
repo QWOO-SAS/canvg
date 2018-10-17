@@ -1,3 +1,8 @@
+var ops;
+var canvases;
+
+var settersGetters = ['fillStyle', 'strokeStyle', 'filter', 'font', 'globalAlpha', 'globalCompositeOperation', 'imageSmoothingEnabled', 'lineCap', 'lineDashOffset', 'lineJoin', 'lineWidth', 'miterLimit', 'shadowBlur', 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'textAlign', 'textBaseline'];
+
 var RGBColor = require('rgbcolor'),
   StackBlur = require('stackblur-canvas');
 
@@ -20,13 +25,42 @@ var ImageClass, CanvasClass,
   defaultClientWidth = 800,
   defaultClientHeight = 600;
 
-function createCanvas() {
+function createCanvas(w, h) {
   var c;
-  if (nodeEnv) {
-    c = new CanvasClass();
-  } else {
-    c = document.createElement('canvas');
+  c = document.createElement('canvas');
+  ops += "var c" + canvases + "=document.createElement('canvas');";
+  c.width = w;
+  c.height = h;
+  ops += "c" + canvases + ".width=" + w +";c" + canvases + ".height=" + h +";";
+  c.idx = canvases;
+  var ctx = c.getContext('2d');
+  c.getContext = function(){
+    ops += "var ctx" + this.idx + "=c" + this.idx + ".getContext('2d');";
+    this.prevCtx = {};
+    for (var j of settersGetters)
+      this.prevCtx[j] = ctx[j];
+    for (let i of ['arc', 'arcTo', 'beginPath', 'bezierCurveTo', 'clearRect', 'clip', 'closePath', 'constructor', 'createImageData', 'createLinearGradient', 'createPattern', 'createRadialGradient', 'drawFocusIfNeeded', 'drawImage', 'ellipse', 'fill', 'fillRect', 'fillText', 'getImageData', 'getLineDash', 'isPointInPath', 'isPointInStroke', 'lineTo', 'measureText', 'moveTo', 'putImageData', 'quadraticCurveTo', 'rect', 'resetTransform', 'restore', 'rotate', 'save', 'scale', 'setLineDash', 'setTransform', 'stroke', 'strokeRect', 'strokeText', 'transform', 'translate']) {
+      let fn = ctx[i];
+      ctx[i] = function(){
+        let ct = this;
+        let c = this.canvas;
+        for (var j of settersGetters)
+          if (ct[j] != c.prevCtx[j]) {
+            ops += "ctx" + c.idx + "." + j + "=" + (typeof ct[j] == 'string' ? "'" + ct[j] + "'" : ct[j]) + ";";
+            c.prevCtx[j] = ct[j];
+          }
+        let args = [];
+        for (let j of Array.prototype.slice.call(arguments)) {
+          args.push(typeof j == 'string' ? "'" + j + "'" : j);
+        }
+        ops += "ctx" + c.idx + "." + i + "(" + args.join(',') + ");";
+        if (i != 'drawImage')
+          return fn.apply(this, arguments);
+      }
+    }
+    return ctx;
   }
+  canvases++;
   return c;
 }
 
@@ -47,19 +81,18 @@ function createCanvas() {
 //       enableRedraw: function => whether enable the redraw interval in node environment
 //       forceRedraw: function => will call the function on every frame, if it returns true, will redraw
 var canvg = function (target, s, opts) {
+  ops = "";
+  canvases = 0;
   // no parameters
   if (target == null && s == null && opts == null) {
     var svgTags = document.querySelectorAll('svg');
     for (var i = 0; i < svgTags.length; i++) {
       var svgTag = svgTags[i];
-      var c = document.createElement('canvas');
       if (typeof(svgTag.clientWidth) !== 'undefined' && typeof(svgTag.clientHeight) !== 'undefined') {
-        c.width = svgTag.clientWidth;
-        c.height = svgTag.clientHeight;
+      var c = createCanvas(svgTag.clientWidth, svgTag.clientHeight);
       } else {
         var rect = svgTag.getBoundingClientRect();
-        c.width = rect.width;
-        c.height = rect.height;
+        var c = createCanvas(rect.width, rect.height);
       }
       svgTag.parentNode.insertBefore(c, svgTag);
       svgTag.parentNode.removeChild(svgTag);
@@ -69,7 +102,10 @@ var canvg = function (target, s, opts) {
     }
     return;
   }
-
+  else if (Array.isArray(target)) {
+    target = createCanvas(target[0], target[1]);
+  }
+  
   var svg = build(opts || {});
   if (nodeEnv) {
     if (!s || s === '') {
@@ -104,7 +140,8 @@ var canvg = function (target, s, opts) {
     // load from url
     svg.load(ctx, s);
   }
-}
+  return {string: ops, canvas: target, ctx: ctx};
+};
 
 var matchesSelector;
 if (nodeEnv) {
@@ -1784,9 +1821,7 @@ function build(opts) {
       tempSvg.attributes['transform'] = new svg.Property('transform', this.attribute('patternTransform').value);
       tempSvg.children = this.children;
 
-      var c = createCanvas();
-      c.width = width;
-      c.height = height;
+      var c = createCanvas(width, height);
       var cctx = c.getContext('2d');
       if (this.attribute('x').hasValue() && this.attribute('y').hasValue()) {
         cctx.translate(this.attribute('x').toPixels('x', true), this.attribute('y').toPixels('y', true));
@@ -1922,9 +1957,7 @@ function build(opts) {
         tempSvg.attributes['width'] = new svg.Property('width', rootView.width);
         tempSvg.attributes['height'] = new svg.Property('height', rootView.height);
         tempSvg.children = [group];
-        var c = createCanvas();
-        c.width = rootView.width;
-        c.height = rootView.height;
+        var c = createCanvas(rootView.width, rootView.height);
         var tempCtx = c.getContext('2d');
         tempCtx.fillStyle = g;
         tempSvg.render(tempCtx);
@@ -2775,15 +2808,11 @@ function build(opts) {
       var mask = element.style('mask').value;
       element.style('mask').value = '';
 
-      var cMask = createCanvas();
-      cMask.width = x + width;
-      cMask.height = y + height;
+      var cMask = createCanvas(x + width, y + height);
       var maskCtx = cMask.getContext('2d');
       this.renderChildren(maskCtx);
 
-      var c = createCanvas();
-      c.width = x + width;
-      c.height = y + height;
+      var c = createCanvas(x + width, y + height);
       var tempCtx = c.getContext('2d');
       element.render(tempCtx);
       tempCtx.globalCompositeOperation = 'destination-in';
@@ -2813,8 +2842,8 @@ function build(opts) {
       var oldBeginPath = ctx.beginPath;
       var oldClosePath = ctx.closePath;
       if (hasContext2D) {
-        CanvasRenderingContext2D.prototype.beginPath = function () { };
-        CanvasRenderingContext2D.prototype.closePath = function () { };
+        ctx.beginPath = function () { };
+        ctx.closePath = function () { };
       }
 
       oldBeginPath.call(ctx);
@@ -2830,7 +2859,7 @@ function build(opts) {
           }
           child.path(ctx);
           if (hasContext2D) {
-            CanvasRenderingContext2D.prototype.closePath = oldClosePath;
+            ctx.closePath = oldClosePath;
           }
           if (transform) { transform.unapply(ctx); }
         }
@@ -2838,8 +2867,8 @@ function build(opts) {
       oldClosePath.call(ctx);
       ctx.clip();
       if (hasContext2D) {
-        CanvasRenderingContext2D.prototype.beginPath = oldBeginPath;
-        CanvasRenderingContext2D.prototype.closePath = oldClosePath;
+        ctx.beginPath = oldBeginPath;
+        ctx.closePath = oldClosePath;
       }
     }
 
@@ -2874,9 +2903,7 @@ function build(opts) {
         py = Math.max(py, efd);
       }
 
-      var c = createCanvas();
-      c.width = width + 2 * px;
-      c.height = height + 2 * py;
+      var c = createCanvas(width + 2 * px, height + 2 * py);
       var tempCtx = c.getContext('2d');
       tempCtx.translate(-x + px, -y + py);
       element.render(tempCtx);
@@ -3151,45 +3178,7 @@ function build(opts) {
       }
     }
 
-    var waitingForImages = true;
-    if (svg.ImagesLoaded()) {
-      waitingForImages = false;
-      draw();
-    }
-    if (!nodeEnv || opts['enableRedraw']) {
-      //In node, in the most cases, we don't need the animation listener.
-      svg.intervalID = setInterval(function () {
-        var needUpdate = false;
-
-        if (waitingForImages && svg.ImagesLoaded()) {
-          waitingForImages = false;
-          needUpdate = true;
-        }
-
-        // need update from mouse events?
-        if (svg.opts['ignoreMouse'] != true) {
-          needUpdate = needUpdate | svg.Mouse.hasEvents();
-        }
-
-        // need update from animations?
-        if (svg.opts['ignoreAnimation'] != true) {
-          for (var i = 0; i < svg.Animations.length; i++) {
-            needUpdate = needUpdate | svg.Animations[i].update(1000 / svg.FRAMERATE);
-          }
-        }
-
-        // need update from redraw?
-        if (typeof svg.opts['forceRedraw'] == 'function') {
-          if (svg.opts['forceRedraw']() == true) needUpdate = true;
-        }
-
-        // render if needed
-        if (needUpdate) {
-          draw();
-          svg.Mouse.runEvents(); // run and clear our events
-        }
-      }, 1000 / svg.FRAMERATE);
-    }
+    draw();
   }
 
   svg.stop = function () {
@@ -3275,7 +3264,7 @@ if (typeof CanvasRenderingContext2D != 'undefined') {
         cOpts[prop] = opts[prop];
       }
     }
-    canvg(this.canvas, s, cOpts);
+    return canvg(this.canvas, s, cOpts);
   }
 }
 
