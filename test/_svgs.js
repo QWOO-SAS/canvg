@@ -27,6 +27,7 @@ const svgs = {
     "28.svg": "viewport",
     "31.svg": "links",
     "32.svg": "images",
+    "37.svg": "textPath",
     "issue106.svg": "Issue #106: gradient transform",
     "issue112.svg": "Issue #112: marker orientation",
     "issue114.svg": "Issue #114: text anchor",
@@ -54,7 +55,7 @@ const svgs = {
     "issue178.svg": "Issue #178: pattern offset",
     "issue179.svg": "Issue #179: animate rotate transform center",
     "issue180.svg": "Issue #180: pattern x offset width (open)",
-    "issue183.svg": "Issue #183: mask error (broken)",
+    "issue183.svg": "Issue #183: mask error",
     "issue184.svg": "Issue #184: transformed pattern",
     "issue187.svg": "Issue #187: nested tspans",
     "issue195.svg": "Issue #195: gray filter",
@@ -82,6 +83,7 @@ const svgs = {
     "issue268.svg": "Issue #268: tspan dx dy not affecting x y",
     "issue269.svg": "Issue #269: opacity in e-notation",
     "issue273.svg": "Issue #273: fill freeze animation",
+    "issue277.svg": "Issue #277: pattern parent opacity",
     "issue282.svg": "Issue #282: treat clip path as attribute",
     "issue289.svg": "Issue #289: multiple clip",
     "issue3.svg": "Issue #3: radial gradient (broken)",
@@ -140,6 +142,8 @@ const svgs = {
     "issue342.svg": "Issue #342: text gradient",
     "issue620.svg": "Issue #620: em font size",
     "issue320.svg": "Issue #320: rem font size",
+    "issue564.svg": "Issue #564: tspan text-anchor",
+    "issue556.svg": "Issue #556: mask using alpha",
   },
 
   broken: {

@@ -1,3 +1,4 @@
+/* eslint-env node */
 import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
 import json from "rollup-plugin-json";
@@ -20,12 +21,14 @@ let plugins = [
 ];
 
 if (is_node) {
-  external = external.concat(["xmldom", "jsdom"]);
+  external = external.concat(["canvas", "xmldom", "jsdom"]);
+  globals.canvas = "canvas";
   globals.xmldom = "xmldom";
   globals.jsdom = "jsdom";
 } else {
   plugins = [
     alias({
+      canvas: "./dummy.js",
       jsdom: "./dummy.js",
       xmldom: "./dummy.js"
     })

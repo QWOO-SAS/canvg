@@ -1,16 +1,17 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 
 <head>
+    <meta charset="utf-8" />
     <title>canvg.js test</title>
-    <link rel="stylesheet" href="./example.css" type="text/css" />
+    <link rel="stylesheet" href="./example.css" />
     <!--[if lt IE 9]>
-		<script type="text/javascript" src="flashcanvas.js"></script>
+		<script src="flashcanvas.js"></script>
 		<![endif]-->
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.4/rgbcolor.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stackblur-canvas/1.4.1/stackblur.min.js"></script>
-    <script type="text/javascript" src="../dist/browser/canvg.js"></script>
-    <script type="text/javascript">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.4/rgbcolor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stackblur-canvas/1.4.1/stackblur.min.js"></script>
+    <script src="../dist/browser/canvg.js"></script>
+    <script>
         function q(k) {
             var qs = window.location.search.substring(1);
             var t = qs.split("&");
@@ -83,7 +84,7 @@
                 document.getElementById('height').value);
         }
     </script>
-    <script type="text/javascript">
+    <script>
         var _gaq = _gaq || [];
         _gaq.push(['_setAccount', 'UA-15494947-1']);
         _gaq.push(['_trackPageview']);
@@ -146,6 +147,7 @@
                     <optgroup label="text">
                         <option value="35.svg">glyphs</option>
                         <option value="36.svg">external</option>
+                        <option value="37.svg">textPath</option>
                     </optgroup>
                     <optgroup label="other">
                         <option value="33.svg">masks</option>
@@ -241,7 +243,7 @@
                     <option value="issue180.svg">Issue #180: pattern x offset width (open)</option>
                     <option value="issue181.svg">Issue #181: linear gradient (broken - not appearing)</option>
                     <option value="issue182.svg">Issue #182: blur (broken - a bit off on intensity)</option>
-                    <option value="issue183.svg">Issue #183: mask error (broken)</option>
+                    <option value="issue183.svg">Issue #183: mask error</option>
                     <option value="issue184.svg">Issue #184: transformed pattern</option>
                     <option value="issue187.svg">Issue #187: nested tspans</option>
                     <option value="issue195.svg">Issue #195: gray filter</option>
@@ -268,6 +270,7 @@
                     <option value="issue268.svg">Issue #268: tspan dx dy not affecting x y</option>
                     <option value="issue269.svg">Issue #269: opacity in e-notation</option>
                     <option value="issue273.svg">Issue #273: fill freeze animation</option>
+                    <option value="issue277.svg">Issue #277: pattern parent opacity</option>
                     <option value="issue282.svg">Issue #282: treat clip path as attribute</option>
                     <option value="issue289.svg">Issue #289: multiple clip</option>
                     <option value="issue322.svg">Issue #322: path parsing</option>
@@ -286,6 +289,8 @@
                     <option value="issue342.svg">Issue #342: text gradient</option>
                     <option value="issue620.svg">Issue #620: em font size</option>
                     <option value="issue320.svg">Issue #320: rem font size</option>
+                    <option value="issue564.svg">Issue #564: tspan text-anchor</option>
+                    <option value="issue556.svg">Issue #556: mask using alpha</option>
                 </select>
             </td>
             <td>
